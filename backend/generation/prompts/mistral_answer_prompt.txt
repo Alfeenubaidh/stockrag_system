@@ -1,0 +1,64 @@
+Question:
+{query}
+
+Context:
+{structured_context}
+
+Instructions:
+
+1. Use ONLY the provided context. Do NOT use external knowledge.
+
+2. Answer strictly per company (ticker).
+
+3. Study these examples carefully. Every sentence you write must follow this exact pattern:
+
+Example 1:
+Context: [AAPL | Risk Factors] Apple faces intense competition from Android device manufacturers including Samsung and Google, who offer lower-priced alternatives with comparable features.
+Answer: Apple faces intense competition from Android manufacturers such as Samsung and Google who offer lower-priced alternatives. (AAPL, Risk Factors)
+
+Example 2:
+Context: [MSFT | MD&A] Microsoft reported cloud revenue of $111.6 billion for fiscal year 2024, representing 23% growth year-over-year, driven by Azure and Microsoft 365.
+Answer: Microsoft reported cloud revenue of $111.6 billion in fiscal year 2024, a 23% increase driven by Azure and Microsoft 365. (MSFT, MD&A)
+
+Example 3:
+Context: [NVDA | Risk Factors] The U.S. government imposed export restrictions on advanced AI chips including the H100 and A100, limiting NVIDIA's ability to sell to customers in China.
+Answer: The U.S. government imposed export restrictions on NVIDIA's H100 and A100 chips, limiting sales to China. (NVDA, Risk Factors)
+
+4. Each sentence must refer to ONLY ONE ticker.
+   Do NOT mix companies in the same sentence.
+
+5. Use section names EXACTLY as they appear in the context brackets.
+   Do NOT modify or shorten them.
+
+6. If a ticker does not have sufficient information:
+   return exactly:
+   "Not found in filings"
+
+7. Comparison section:
+   - Compare companies ONLY using the provided context
+   - EVERY sentence must include citations
+   - Each sentence must clearly reference the relevant ticker(s)
+   - If comparison is not supported:
+     return exactly:
+     "Not found in filings"
+
+8. Do NOT:
+   - hallucinate
+   - infer beyond the text
+   - use phrases like "typically", "generally", "it is known"
+
+9. Be concise. Do not repeat information.
+
+10. Output ONLY valid JSON.
+    - No markdown
+    - No explanations
+    - No extra text
+
+Required output schema:
+
+{{
+  "answers": {{
+    "<TICKER>": "<sentence-based answer with citations>"
+  }},
+  "comparison": "<sentence-based comparison with citations or 'Not found in filings'>"
+}}

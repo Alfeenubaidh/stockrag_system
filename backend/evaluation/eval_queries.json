@@ -1,0 +1,691 @@
+[
+  {
+    "query": "What are the main competition risks Apple faces?",
+    "expected": {
+      "tickers": [
+        "AAPL"
+      ],
+      "sections": [
+        "risk factors",
+        "business"
+      ],
+      "keywords": [
+        "competition",
+        "competitors",
+        "market",
+        "competitive"
+      ]
+    },
+    "id": "Q01"
+  },
+  {
+    "query": "What supply chain and manufacturing risks did Apple disclose?",
+    "expected": {
+      "tickers": [
+        "AAPL"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "supply chain",
+        "manufacturing",
+        "supplier",
+        "concentration"
+      ]
+    },
+    "id": "Q02"
+  },
+  {
+    "query": "What regulatory and legal risks did Apple disclose?",
+    "expected": {
+      "tickers": [
+        "AAPL"
+      ],
+      "sections": [
+        "risk factors",
+        "legal proceedings"
+      ],
+      "keywords": [
+        "regulatory",
+        "legal",
+        "litigation",
+        "regulation"
+      ]
+    },
+    "id": "Q03"
+  },
+  {
+    "query": "What did Apple say about revenue and net sales performance in fiscal 2024?",
+    "expected": {
+      "tickers": [
+        "AAPL"
+      ],
+      "sections": [
+        "management",
+        "md&a"
+      ],
+      "keywords": [
+        "revenue",
+        "net sales",
+        "fiscal",
+        "growth"
+      ]
+    },
+    "id": "Q04"
+  },
+  {
+    "query": "What products and services does Apple offer and what markets does it serve?",
+    "expected": {
+      "tickers": [
+        "AAPL"
+      ],
+      "sections": [
+        "business"
+      ],
+      "keywords": [
+        "products",
+        "services",
+        "markets",
+        "iphone"
+      ]
+    },
+    "id": "Q05"
+  },
+  {
+    "query": "What did Apple disclose about its services segment revenue and growth?",
+    "expected": {
+      "tickers": [
+        "AAPL"
+      ],
+      "sections": [
+        "management",
+        "md&a",
+        "financial statements"
+      ],
+      "keywords": [
+        "services",
+        "revenue",
+        "segment",
+        "growth"
+      ]
+    },
+    "id": "Q06"
+  },
+  {
+    "query": "What foreign currency and interest rate risks does Apple face?",
+    "expected": {
+      "tickers": [
+        "AAPL"
+      ],
+      "sections": [
+        "market risk"
+      ],
+      "keywords": [
+        "foreign currency",
+        "interest rate",
+        "exchange",
+        "hedging"
+      ]
+    },
+    "id": "Q07"
+  },
+  {
+    "query": "What risks did Microsoft identify around cloud and Azure competition?",
+    "expected": {
+      "tickers": [
+        "MSFT"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "cloud",
+        "azure",
+        "competition",
+        "competitors"
+      ]
+    },
+    "id": "Q08"
+  },
+  {
+    "query": "What did Microsoft say about cybersecurity and data breach risks?",
+    "expected": {
+      "tickers": [
+        "MSFT"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "cybersecurity",
+        "data breach",
+        "security",
+        "cyber"
+      ]
+    },
+    "id": "Q09"
+  },
+  {
+    "query": "What did Microsoft disclose about AI investment and capital expenditure?",
+    "expected": {
+      "tickers": [
+        "MSFT"
+      ],
+      "sections": [
+        "management",
+        "md&a"
+      ],
+      "keywords": [
+        "ai",
+        "investment",
+        "capital",
+        "expenditure"
+      ]
+    },
+    "id": "Q10"
+  },
+  {
+    "query": "What were Microsoft's segment revenues and operating income by business unit?",
+    "expected": {
+      "tickers": [
+        "MSFT"
+      ],
+      "sections": [
+        "segment results",
+        "management",
+        "md&a"
+      ],
+      "keywords": [
+        "segment",
+        "revenue",
+        "operating income",
+        "business unit"
+      ]
+    },
+    "id": "Q11"
+  },
+  {
+    "query": "What does Microsoft say about its gaming business and Xbox strategy?",
+    "expected": {
+      "tickers": [
+        "MSFT"
+      ],
+      "sections": [
+        "gaming",
+        "business"
+      ],
+      "keywords": [
+        "gaming",
+        "xbox",
+        "game",
+        "console"
+      ]
+    },
+    "id": "Q12"
+  },
+  {
+    "query": "What acquisition-related regulatory and antitrust risks does Microsoft face?",
+    "expected": {
+      "tickers": [
+        "MSFT"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "acquisition",
+        "antitrust",
+        "regulatory",
+        "merger"
+      ]
+    },
+    "id": "Q13"
+  },
+  {
+    "query": "What risk factors did NVIDIA disclose related to supply and demand for AI chips?",
+    "expected": {
+      "tickers": [
+        "NVDA"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "supply",
+        "demand",
+        "chips",
+        "gpu",
+        "semiconductor"
+      ]
+    },
+    "id": "Q14"
+  },
+  {
+    "query": "What did NVIDIA disclose about its data center segment and key customers?",
+    "expected": {
+      "tickers": [
+        "NVDA"
+      ],
+      "sections": [
+        "management",
+        "md&a",
+        "business"
+      ],
+      "keywords": [
+        "data center",
+        "customers",
+        "revenue",
+        "segment"
+      ]
+    },
+    "id": "Q15"
+  },
+  {
+    "query": "What export control and China-related risks did NVIDIA identify in its filings?",
+    "expected": {
+      "tickers": [
+        "NVDA"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "export",
+        "china",
+        "control",
+        "restrictions"
+      ]
+    },
+    "id": "Q16"
+  },
+  {
+    "query": "What did NVIDIA management say about revenue growth and the demand outlook?",
+    "expected": {
+      "tickers": [
+        "NVDA"
+      ],
+      "sections": [
+        "outlook",
+        "management",
+        "md&a"
+      ],
+      "keywords": [
+        "revenue",
+        "growth",
+        "demand",
+        "outlook"
+      ]
+    },
+    "id": "Q17"
+  },
+  {
+    "query": "What cybersecurity risks and governance practices did NVIDIA disclose?",
+    "expected": {
+      "tickers": [
+        "NVDA"
+      ],
+      "sections": [
+        "cybersecurity",
+        "risk factors"
+      ],
+      "keywords": [
+        "cybersecurity",
+        "security",
+        "risk",
+        "governance"
+      ]
+    },
+    "id": "Q18"
+  },
+  {
+    "query": "What non-GAAP financial measures does NVIDIA report and how do they differ from GAAP?",
+    "expected": {
+      "tickers": [
+        "NVDA"
+      ],
+      "sections": [
+        "non-gaap",
+        "management",
+        "md&a",
+        "exhibits"
+      ],
+      "keywords": [
+        "non-gaap",
+        "gaap",
+        "adjusted",
+        "reconciliation"
+      ]
+    },
+    "id": "Q19"
+  },
+  {
+    "query": "What did Tesla disclose about vehicle production and delivery?",
+    "expected": {
+      "tickers": [
+        "TSLA"
+      ],
+      "sections": [
+        "management",
+        "md&a",
+        "financial statements"
+      ],
+      "keywords": [
+        "production",
+        "delivery",
+        "vehicles",
+        "units"
+      ]
+    },
+    "id": "Q20"
+  },
+  {
+    "query": "What risks did Tesla identify related to autonomous driving and AI regulation?",
+    "expected": {
+      "tickers": [
+        "TSLA"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "autonomous",
+        "driving",
+        "regulation",
+        "safety"
+      ]
+    },
+    "id": "Q21"
+  },
+  {
+    "query": "What did Tesla say about its energy storage and solar business performance?",
+    "expected": {
+      "tickers": [
+        "TSLA"
+      ],
+      "sections": [
+        "management",
+        "md&a",
+        "financial statements"
+      ],
+      "keywords": [
+        "energy storage",
+        "solar",
+        "powerwall",
+        "megapack"
+      ]
+    },
+    "id": "Q22"
+  },
+  {
+    "query": "What market and interest rate risks did Tesla disclose?",
+    "expected": {
+      "tickers": [
+        "TSLA"
+      ],
+      "sections": [
+        "market risk",
+        "risk factors"
+      ],
+      "keywords": [
+        "interest rate",
+        "market risk",
+        "currency",
+        "exposure"
+      ]
+    },
+    "id": "Q23"
+  },
+  {
+    "query": "What did Tesla disclose about its liquidity position and capital requirements?",
+    "expected": {
+      "tickers": [
+        "TSLA"
+      ],
+      "sections": [
+        "management",
+        "md&a",
+        "financial statements"
+      ],
+      "keywords": [
+        "liquidity",
+        "capital",
+        "cash",
+        "financing"
+      ]
+    },
+    "id": "Q24"
+  },
+  {
+    "query": "Compare the cybersecurity and data risk disclosures between Apple and Microsoft",
+    "expected": {
+      "tickers": [
+        "AAPL",
+        "MSFT"
+      ],
+      "sections": [
+        "risk factors",
+        "cybersecurity"
+      ],
+      "keywords": [
+        "cybersecurity",
+        "data",
+        "security",
+        "breach"
+      ]
+    },
+    "id": "Q25"
+  },
+  {
+    "query": "How do Apple and NVIDIA describe competition in their respective markets?",
+    "expected": {
+      "tickers": [
+        "AAPL",
+        "NVDA"
+      ],
+      "sections": [
+        "risk factors",
+        "business"
+      ],
+      "keywords": [
+        "competition",
+        "competitive",
+        "market",
+        "competitors"
+      ]
+    },
+    "id": "Q26"
+  },
+  {
+    "query": "Compare regulatory and legal risk disclosures between Microsoft and NVIDIA",
+    "expected": {
+      "tickers": [
+        "MSFT",
+        "NVDA"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "regulatory",
+        "legal",
+        "compliance",
+        "regulation"
+      ]
+    },
+    "id": "Q27"
+  },
+  {
+    "query": "What did Microsoft and NVIDIA each say about data center and AI-driven revenue?",
+    "expected": {
+      "tickers": [
+        "MSFT",
+        "NVDA"
+      ],
+      "sections": [
+        "management",
+        "md&a"
+      ],
+      "keywords": [
+        "data center",
+        "ai",
+        "revenue",
+        "growth"
+      ]
+    },
+    "id": "Q28"
+  },
+  {
+    "query": "Compare supply chain concentration risks disclosed by Apple and Tesla",
+    "expected": {
+      "tickers": [
+        "AAPL",
+        "TSLA"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "supply chain",
+        "concentration",
+        "supplier",
+        "manufacturing"
+      ]
+    },
+    "id": "Q29"
+  },
+  {
+    "query": "What did Apple and Microsoft disclose about AI integration in their products and services?",
+    "expected": {
+      "tickers": [
+        "AAPL",
+        "MSFT"
+      ],
+      "sections": [
+        "business",
+        "risk factors"
+      ],
+      "keywords": [
+        "ai",
+        "artificial intelligence",
+        "integration",
+        "products"
+      ]
+    },
+    "id": "Q30"
+  },
+  {
+    "query": "Which company identified export restriction risks for advanced computing chips destined for China?",
+    "expected": {
+      "tickers": [
+        "NVDA"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "export",
+        "china",
+        "restrictions",
+        "chips"
+      ]
+    },
+    "id": "Q31"
+  },
+  {
+    "query": "What company disclosed significant reliance on a single contract manufacturer for device assembly?",
+    "expected": {
+      "tickers": [
+        "AAPL"
+      ],
+      "sections": [
+        "risk factors",
+        "financial statements",
+        "business"
+      ],
+      "keywords": [
+        "manufacturer",
+        "contract",
+        "assembly",
+        "reliance"
+      ]
+    },
+    "id": "Q32"
+  },
+  {
+    "query": "Which filing describes risks from regulatory delays in approving autonomous vehicle software?",
+    "expected": {
+      "tickers": [
+        "TSLA"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "autonomous",
+        "regulatory",
+        "approval",
+        "software"
+      ]
+    },
+    "id": "Q33"
+  },
+  {
+    "query": "What company reported that demand for AI training and inference workloads drove record revenue?",
+    "expected": {
+      "tickers": [
+        "NVDA"
+      ],
+      "sections": [
+        "management",
+        "md&a",
+        "outlook"
+      ],
+      "keywords": [
+        "ai",
+        "training",
+        "inference",
+        "revenue",
+        "record"
+      ]
+    },
+    "id": "Q34"
+  },
+  {
+    "query": "Which company disclosed regulatory risk from the EU Digital Markets Act affecting app store policies?",
+    "expected": {
+      "tickers": [
+        "AAPL"
+      ],
+      "sections": [
+        "risk factors"
+      ],
+      "keywords": [
+        "digital markets act",
+        "app store",
+        "eu",
+        "regulatory"
+      ]
+    },
+    "id": "Q35"
+  },
+  {
+    "query": "Which company faces integration and antitrust risks from a large gaming studio acquisition?",
+    "expected": {
+      "tickers": [
+        "MSFT"
+      ],
+      "sections": [
+        "risk factors",
+        "gaming"
+      ],
+      "keywords": [
+        "acquisition",
+        "antitrust",
+        "gaming",
+        "integration"
+      ]
+    },
+    "id": "Q36"
+  }
+]

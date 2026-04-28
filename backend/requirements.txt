@@ -1,0 +1,43 @@
+# Core
+numpy
+pandas
+tqdm
+
+# Embeddings / NLP
+sentence-transformers
+torch
+transformers
+
+# Vector DB
+qdrant-client
+
+# Parsing
+beautifulsoup4
+lxml
+pdfplumber
+pymupdf
+
+# Utils
+python-dotenv
+requests
+feedparser
+
+# API
+fastapi
+uvicorn[standard]
+pydantic-settings
+python-multipart
+
+# Caching / rate limiting
+redis
+slowapi
+
+# Scheduler
+APScheduler
+
+# Observability
+prometheus-fastapi-instrumentator
+prometheus-client
+
+# Logging / misc
+typing-extensions

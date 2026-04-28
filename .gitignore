@@ -1,0 +1,35 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Environment
+.env
+.env.local
+
+# Data — never commit raw filings or vectors
+data/raw/
+data/chunks/
+backend/data/
+
+# Claude
+.claude/
+
+# Misc
+structure.txt
+*.log
+
+# Logs and traces
+data/logs/
+data/qdrant_local/
+data/ledger.json
+data/embedding_version.json
+
+# Claude Code internals
+claude.md
+.claude/
+
+# Frontend node_modules
+frontend/node_modules/

@@ -1,0 +1,6 @@
+{
+  "name": "RAG Chat Interface",
+  "description": "A high-fidelity Claude-style chat interface for Retrieval-Augmented Generation systems, featuring sidebars, source citations, and professional typography.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

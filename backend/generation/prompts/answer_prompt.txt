@@ -1,0 +1,78 @@
+Question:
+{query}
+
+Context:
+{structured_context}
+
+Instructions:
+
+1. Use ONLY the provided context. Do NOT use external knowledge.
+
+2. Answer strictly per company (ticker).
+
+3. For each ticker:
+   - Write in sentences.
+   - EVERY sentence MUST end with an inline citation in this exact format:
+     (TICKER, Section Name)
+   - Place the citation immediately after the sentence it supports, before the period or at the sentence end.
+   - Example: AAPL reported strong iPhone revenue. (AAPL, MD&A)
+   - Do NOT put all citations at the end of a paragraph.
+   - Do NOT group multiple claims under a single citation.
+
+CITATION RULES (mandatory):
+- Every single sentence must end with (TICKER, Section) before the period
+- Wrong: 'Revenue grew 12%.'
+- Correct: 'Revenue grew 12%. (AAPL, MD&A)'
+- Wrong: put citations only at end of paragraph
+- If you write a sentence without a citation, your answer is invalid
+
+4. Each sentence must refer to ONLY ONE ticker.
+   Do NOT mix companies in the same sentence.
+
+5. Use section names EXACTLY as they appear in the context.
+   Do NOT modify or shorten them.
+
+6. If a ticker does not have sufficient information:
+   return exactly:
+   "Not found in filings"
+
+7. Comparison section:
+   - Compare companies ONLY using the provided context
+   - EVERY sentence must include citations
+   - Each sentence must clearly reference the relevant ticker(s)
+   - If comparison is not supported:
+     return exactly:
+     "Not found in filings"
+
+8. Do NOT:
+   - hallucinate
+   - infer beyond the text
+   - use phrases like "typically", "generally", "it is known"
+
+9. Answer thoroughly — list ALL risk factors and relevant details found across the provided chunks. Do not repeat identical information, but do not omit any distinct risk factor or claim present in the context.
+
+10. Output ONLY valid JSON.
+    - No markdown
+    - No explanations
+    - No extra text
+
+Required output schema:
+
+{{
+  "answers": {{
+    "<TICKER>": "<sentence-based answer with citations>"
+  }},
+  "comparison": "<sentence-based comparison with citations or 'Not found in filings'>"
+}}
+
+Example of a correctly formatted multi-ticker response:
+
+{{
+  "answers": {{
+    "AAPL": "Apple faces risk from foreign currency fluctuations on its international revenue. (AAPL, market risk) The Company uses derivative instruments to partially hedge this exposure. (AAPL, market risk)",
+    "MSFT": "Microsoft's revenue is subject to foreign exchange rate volatility across its global segments. (MSFT, risk factors) The Company monitors these exposures and may use hedging strategies. (MSFT, risk factors)"
+  }},
+  "comparison": "Both Apple and Microsoft face foreign currency risk, though Apple explicitly discloses use of foreign currency swaps. (AAPL, market risk) Microsoft focuses on segment-level hedging strategies. (MSFT, risk factors)"
+}}
+
+IMPORTANT: The "comparison" key is ALWAYS required in your output, even if you write 'Not found in filings'.

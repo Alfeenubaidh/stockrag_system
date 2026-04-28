@@ -1,0 +1,6 @@
+Filing excerpts:
+{context}
+
+Question: {query}
+
+Answer in prose. Cite each claim inline as [TICKER DOC_TYPE · Section]. End with the disclaimer.
