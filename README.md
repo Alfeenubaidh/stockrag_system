@@ -1,59 +1,115 @@
 # StockRAG
 
-Production RAG system for financial research. Answers questions grounded in SEC filings (10-K, 10-Q, 8-K) with mandatory citations, live market data, and hallucination detection.
+A production-grade Retrieval-Augmented Generation system for financial research. Ask questions about publicly traded companies — answers are grounded in SEC filings (10-K, 10-Q, 8-K) with source citations, hallucination detection, and live market data injected at query time.
 
-**Live:** [stockrag-system.vercel.app](https://stockrag-system.vercel.app) — backend: [stockrag-system.onrender.com](https://stockrag-system.onrender.com)
+**Frontend:** https://stockrag-system.vercel.app
+**Backend API:** https://stockrag-system.onrender.com/docs
+
+---
+
+## Key Capabilities
+
+- Answers grounded in SEC filings with mandatory `[TICKER · DOCTYPE · SECTION]` citations
+- Every response carries a financial disclaimer — non-negotiable by design
+- Hallucination detection: claims checked against retrieved chunks before serving
+- Live market data (price, ratios) fetched at query time and injected into context
+- Streaming responses via SSE (`/query/stream`)
+- Section-aware retrieval: risk queries routed to Risk Factors, outlook queries to MD&A
+- Date-scoped retrieval: Q2 2024 filings are not mixed with 2019 filings
 
 ---
 
 ## Architecture
 
 ```
-frontend/          React + Vite + Tailwind (deployed on Vercel)
+React + Vite (Vercel)
+    │
+    │  HTTPS  (VITE_API_URL)
+    ▼
+FastAPI + Uvicorn (Render)
+    ├── /query              dense + BM25 hybrid retrieval → Groq generation
+    ├── /query/stream       same pipeline, SSE token stream
+    ├── /ingest             upload and index a filing
+    └── /documents          list ingested tickers and chunk counts
+    │
+    ├── Qdrant Cloud        vector store (384-dim, cosine, keyword indexes)
+    ├── Groq API            LLM inference (llama-3.1-8b-instant)
+    ├── HF Inference API    remote embeddings (all-MiniLM-L6-v2)
+    └── yfinance            live market data (price, P/E, EPS)
+```
+
+### Backend module layout
+
+```
 backend/
-├── api/           FastAPI — /query, /query/stream, /ingest, /documents
-├── ingestion/     PDF/HTML parser → section detection → chunking → embed → Qdrant
-├── retrieval/     Dense + BM25 hybrid search, RRF, cross-encoder reranking
-├── generation/    Groq LLM, citation enforcement, grounding check, SSE streaming
-├── market_data/   Live price + ratios via yfinance (injected at query time)
-├── embeddings/    Remote mode (HF Inference API) or local SentenceTransformers
-├── evaluation/    End-to-end eval harness
+├── api/           FastAPI routers, auth, rate limiting
+├── ingestion/     PDF/HTML parser → section detection → chunker → validator
+├── embeddings/    Local SentenceTransformer or remote HF Inference API
+├── vector_store/  Qdrant upsert, collection management, payload indexes
+├── retrieval/     Dense search, BM25, RRF fusion, cross-encoder reranker
+├── generation/    Groq LLM, citation enforcement, grounding check, streaming
+├── market_data/   Live price snapshot (injected at query time, never stored)
+├── evaluation/    End-to-end eval harness with per-query R/G/E2E scoring
 └── observability/ Prometheus metrics, structured pipeline logging
 ```
 
-**Eval:** `avg_R=0.9226` · `avg_G=0.8710` · `avg_E2E=0.8026` · 34/36 passing
+---
+
+## Evaluation Results
+
+| Metric | Score |
+|---|---|
+| Retrieval (avg_R) | 0.9226 |
+| Generation (avg_G) | 0.8710 |
+| End-to-End (avg_E2E) | 0.8026 |
+| Passing queries | 34 / 36 |
+
+Run eval:
+
+```bash
+cd backend
+python evaluation/e2e_eval.py
+# or a 10-query sample:
+python evaluation/e2e_eval.py --sample 10
+```
 
 ---
 
-## Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| LLM | Groq (`llama-3.1-8b-instant`) |
-| Embeddings | HF Inference API (`all-MiniLM-L6-v2`, remote) |
+| Frontend | React 19, Vite, Tailwind CSS, Zustand |
+| Hosting (frontend) | Vercel (static build) |
+| Backend | FastAPI, Uvicorn, Python 3.11 |
+| Hosting (backend) | Render |
+| LLM | Groq API — `llama-3.1-8b-instant` |
+| Embeddings | HF Inference API — `sentence-transformers/all-MiniLM-L6-v2` |
 | Vector DB | Qdrant Cloud |
-| Retrieval | Dense + BM25 hybrid (RRF) |
-| Reranker | Cross-encoder (disabled in prod, no torch) |
-| Backend | FastAPI + Uvicorn on Render |
-| Frontend | React 19 + Tailwind + Zustand on Vercel |
+| Retrieval | Dense + BM25 hybrid (Reciprocal Rank Fusion) |
 | Market Data | yfinance |
 | Filing Source | SEC EDGAR public API |
+| Rate Limiting | slowapi |
+| Metrics | Prometheus + prometheus-fastapi-instrumentator |
 
 ---
 
-## Local Dev Setup
+## Local Setup
 
 ### Prerequisites
 
 - Python 3.11+
 - Node.js 18+
+- A [Qdrant Cloud](https://cloud.qdrant.io) cluster (free tier works)
+- [Groq API key](https://console.groq.com)
+- [Hugging Face token](https://huggingface.co/settings/tokens) with Inference API access
 
 ### Backend
 
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\Activate.ps1
+source .venv/bin/activate      # Windows: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
@@ -63,23 +119,23 @@ Create `backend/.env`:
 QDRANT_URL=https://your-cluster.qdrant.io
 QDRANT_API_KEY=your-qdrant-api-key
 GROQ_API_KEY=your-groq-api-key
-HF_API_KEY=your-hf-token
+HF_API_KEY=your-huggingface-token
 USE_REMOTE_EMBEDDINGS=true
 ```
 
-Set up Qdrant collection:
+Set up the Qdrant collection and payload indexes:
 
 ```bash
-python scripts/setup_qdrant.py
+PYTHONPATH=. python scripts/setup_qdrant.py
 ```
 
-Start backend:
+Start the backend:
 
 ```bash
-uvicorn api.main:app --host 0.0.0.0 --port 10000
+PYTHONPATH=. uvicorn api.main:app --host 0.0.0.0 --port 10000
 ```
 
-API docs: `http://localhost:10000/docs`
+API docs available at `http://localhost:10000/docs`.
 
 ### Frontend
 
@@ -100,28 +156,20 @@ npm run dev
 
 ---
 
-## Ingest
+## Ingestion
 
-Batch ingest a folder of PDFs/HTML named `TICKER_YEAR_DOCTYPE.{pdf,html}`:
+Batch ingest a folder of SEC filing PDFs or HTML files:
 
 ```bash
 cd backend
-python scripts/ingest_batch.py --dir ../data/raw
+PYTHONPATH=. python scripts/ingest_batch.py --dir ../data/raw
 ```
 
-Single file:
-
-```bash
-python ingest_single.py \
-  --ticker AAPL \
-  --file path/to/aapl_10k.pdf \
-  --doc-type 10-K \
-  --filing-date 2024-09-28
-```
+Files should be named `TICKER_YEAR_DOCTYPE.pdf` (e.g. `AAPL_2024_10-K.pdf`). The pipeline parses, sections, chunks, embeds, and upserts to Qdrant. Duplicate documents are detected and skipped.
 
 ---
 
-## API
+## API Reference
 
 ### POST /query
 
@@ -131,7 +179,7 @@ python ingest_single.py \
 
 ```json
 {
-  "answer": "**AAPL**: Apple faces... [AAPL 10-K · FY2024 · Risk Factors]\n\n---\nThis is not financial advice.",
+  "answer": "**AAPL**: Apple faces significant competition... [AAPL 10-K · FY2024 · Risk Factors]\n\n---\nThis is not financial advice.",
   "citations": ["[AAPL 10-K · FY2024 · Risk Factors]"],
   "latency_ms": 2100
 }
@@ -139,29 +187,18 @@ python ingest_single.py \
 
 ### POST /query/stream
 
-Same request body — returns `text/event-stream` SSE tokens.
+Same request body — returns `text/event-stream` SSE token stream. Ends with `data: [DONE]`.
 
 ### GET /documents
 
-Returns all ingested tickers with chunk counts and sections.
+Returns all ingested tickers with chunk counts, section list, and last filing date.
 
----
+### POST /ingest
 
-## Evaluation
-
-```bash
-cd backend
-python evaluation/e2e_eval.py
-```
-
-Per-query `R`, `G`, `E2E` scores with failure classification. Sample run:
-
-```bash
-python evaluation/e2e_eval.py --sample 10
-```
+Multipart upload of a single filing with metadata fields (`ticker`, `doc_type`, `filing_date`).
 
 ---
 
 ## Disclaimer
 
-For informational and research purposes only. Nothing in this application constitutes financial advice.
+This system is for informational and research purposes only. Nothing produced by this application constitutes financial advice. Always consult a qualified financial advisor before making investment decisions.
