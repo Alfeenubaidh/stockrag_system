@@ -19,6 +19,9 @@ pymupdf
 # HTTP (remote embeddings)
 httpx
 
+# BM25 sparse retrieval
+rank-bm25
+
 # Utils
 python-dotenv
 requests
