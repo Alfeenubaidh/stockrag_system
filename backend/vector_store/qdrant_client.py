@@ -16,24 +16,27 @@ from qdrant_client import QdrantClient
 
 logger = logging.getLogger(__name__)
 
-QDRANT_URL = "http://localhost:6333"
 COLLECTION_NAME = "sec_filings"
 
 
 def get_qdrant_client() -> QdrantClient:
     """
-    Return a connected QdrantClient pointed at the Docker server.
+    Return a connected QdrantClient using settings.qdrant_url / settings.qdrant_api_key.
 
-    Raises RuntimeError immediately if the server is unreachable —
-    prevents silent failures deep inside the pipeline.
+    Raises RuntimeError immediately if the server is unreachable.
     """
-    logger.info("Using Qdrant server at %s", QDRANT_URL)
-    client = QdrantClient(url=QDRANT_URL)
+    from config.settings import settings
+
+    url = settings.qdrant_url
+    api_key = settings.qdrant_api_key or None
+
+    logger.info("Using Qdrant server at %s", url)
+    client = QdrantClient(url=url, api_key=api_key)
     try:
         client.get_collections()
     except Exception as exc:
         raise RuntimeError(
-            f"Qdrant server not running on {QDRANT_URL}. "
-            "Start it with: docker run -p 6333:6333 qdrant/qdrant"
+            f"Qdrant unreachable at {url}. "
+            "Check QDRANT_URL and QDRANT_API_KEY."
         ) from exc
     return client

@@ -31,7 +31,7 @@ def list_documents() -> list[TickerSummary]:
     from qdrant_client import QdrantClient
 
     try:
-        qdrant = QdrantClient(url=settings.qdrant_url)
+        qdrant = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key or None)
         qdrant.get_collections()  # connectivity check
     except Exception as exc:
         logger.warning("documents: Qdrant unreachable: %s", exc)
