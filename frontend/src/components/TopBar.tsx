@@ -1,5 +1,5 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
-import { Code, Database, LayoutGrid, Loader2, ChevronDown, User, X } from 'lucide-react';
+import { Database, LayoutGrid, Loader2, ChevronDown, User, X } from 'lucide-react';
 
 interface KbDocument {
   ticker: string;
@@ -147,14 +147,6 @@ export const TopBar: React.FC = () => {
           >
             <Database className="w-4 h-4" />
             Knowledge Base
-          </button>
-
-          <button
-            className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700 h-full px-1 transition-colors"
-            onClick={() => window.open(`${import.meta.env.VITE_API_URL}/docs`, '_blank')}
-          >
-            <Code className="w-4 h-4" />
-            API
           </button>
         </nav>
 

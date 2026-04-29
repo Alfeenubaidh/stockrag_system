@@ -4,7 +4,7 @@ import logging
 from collections import defaultdict
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 
 from config.settings import settings
@@ -26,7 +26,7 @@ def list_documents() -> list[TickerSummary]:
     """
     Scroll the entire sec_filings collection and return one summary row per ticker:
     chunk count, distinct section names, and the most recent filing_date seen.
-    Returns 503 when Qdrant is unreachable so the frontend can show a clear message.
+    Returns an empty list when Qdrant is unreachable so the frontend shows empty rather than an error.
     """
     from qdrant_client import QdrantClient
 
@@ -34,11 +34,8 @@ def list_documents() -> list[TickerSummary]:
         qdrant = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key or None)
         qdrant.get_collections()  # connectivity check
     except Exception as exc:
-        logger.warning("documents: Qdrant unreachable: %s", exc)
-        raise HTTPException(
-            status_code=503,
-            detail="Vector store unavailable — is Qdrant running?",
-        ) from exc
+        logger.warning("documents: Qdrant unreachable, returning empty list: %s", exc)
+        return []
 
     collection = settings.qdrant_collection
 
@@ -76,8 +73,8 @@ def list_documents() -> list[TickerSummary]:
             if offset is None:
                 break
     except Exception as exc:
-        logger.error("documents scroll failed: %s", exc, exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to read collection: {exc}") from exc
+        logger.error("documents scroll failed, returning empty list: %s", exc, exc_info=True)
+        return []
 
     return [
         TickerSummary(
