@@ -51,7 +51,9 @@ app.add_middleware(
         "http://localhost:5173",
         "https://stockrag-system.vercel.app",
     ],
-    allow_methods=["GET", "POST"],
+    # Covers Vercel preview deployments (e.g. stockrag-system-abc123-user.vercel.app)
+    allow_origin_regex=r"https://stockrag-system-[a-z0-9\-]+\.vercel\.app",
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
 )
 
