@@ -19,12 +19,22 @@ from __future__ import annotations
 import logging
 from typing import List, Optional
 
-from sentence_transformers import CrossEncoder
+try:
+    from sentence_transformers import CrossEncoder
+    _RERANKER_AVAILABLE = True
+except ImportError:
+    _RERANKER_AVAILABLE = False
 
 from retrieval.ranking_signals import RankingSignalScorer
 from observability.pipeline_observer import observer
 
 logger = logging.getLogger(__name__)
+
+if not _RERANKER_AVAILABLE:
+    logger.warning(
+        "sentence-transformers not installed — CrossEncoderReranker disabled. "
+        "Install torch + sentence-transformers to enable reranking."
+    )
 
 _SECTION_BONUS = 6.0
 _signal_scorer = RankingSignalScorer()
@@ -54,8 +64,11 @@ class CrossEncoderReranker:
         model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2",
         batch_size: int = 32,
     ):
-        self.model      = CrossEncoder(model_name)
         self.batch_size = batch_size
+        if _RERANKER_AVAILABLE:
+            self.model = CrossEncoder(model_name)
+        else:
+            self.model = None
 
     def rerank(
         self,
@@ -75,6 +88,10 @@ class CrossEncoderReranker:
         """
         if not results:
             return results
+
+        if self.model is None:
+            logger.debug("rerank: no model available, returning top_k by existing score")
+            return results[:top_k]
 
         # Cross-encoder scores full chunk text — no truncation
         pairs  = [(query, r.text) for r in results]
