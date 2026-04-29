@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     # Qdrant
     qdrant_url: str = "http://localhost:6333"
     qdrant_collection: str = "sec_filings"
+    qdrant_api_key: str = Field(default="", env="QDRANT_API_KEY")
 
     # Embedder
     embedding_model: str = "all-MiniLM-L6-v2"

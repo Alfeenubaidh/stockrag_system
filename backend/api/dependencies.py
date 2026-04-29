@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 @lru_cache(maxsize=1)
 def get_qdrant() -> QdrantClient:
     logger.info("Connecting to Qdrant at %s", settings.qdrant_url)
-    client = QdrantClient(url=settings.qdrant_url)
+    client = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key or None)
     try:
         client.get_collections()
     except Exception as exc:
