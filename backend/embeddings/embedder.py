@@ -34,7 +34,7 @@ class EmbeddingPipeline:
     def __init__(self, config: EmbeddingConfig = EmbeddingConfig()):
         self.config = config
 
-        from backend.config.settings import settings
+        from config.settings import settings
 
         self._remote = settings.use_remote_embeddings
 
