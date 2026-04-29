@@ -1,6 +1,7 @@
 import re
 import logging
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List, Optional
 
 from bs4 import BeautifulSoup
@@ -219,3 +220,35 @@ def parse_html_filing(
     logger.info(f"{len(pages)} chunks created")
 
     return pages
+
+
+# ------------------------------------------------------------------
+# BASE PARSER ADAPTER
+# ------------------------------------------------------------------
+
+class HTMLParser:
+    """
+    Adapts parse_html_filing to the BaseParser interface expected by Ingest.
+
+    Each ParsedPage produced by the HTML parser is mapped to a models.Page
+    so it can flow through the standard Chunker / Validator / SectionDetector
+    stages unchanged.
+    """
+
+    def extract(self, path: str, doc_id: str) -> list:
+        from ingestion.models import Page as ModelPage
+
+        parsed_pages = parse_html_filing(path, doc_id=doc_id)
+
+        if not parsed_pages:
+            raise ValueError(f"No content extracted from HTML: {path!r}")
+
+        return [
+            ModelPage(
+                page=i + 1,
+                text=pp.text,
+                doc_id=doc_id,
+                section=pp.section,
+            )
+            for i, pp in enumerate(parsed_pages)
+        ]

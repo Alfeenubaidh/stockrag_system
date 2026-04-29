@@ -15,6 +15,8 @@ from typing import Optional
 
 import requests
 
+from config.settings import settings
+
 logger = logging.getLogger(__name__)
 
 _USER_AGENT = "StockRAG research@stockrag.com"
@@ -121,7 +123,7 @@ def get_latest_filing(ticker: str, doc_type: str = "10-K") -> Optional[dict]:
 
 def download_filing(
     filing: dict,
-    output_dir: str = "data/raw/pdfs",
+    output_dir: Path | str | None = None,
 ) -> Optional[Path]:
     """
     Download the primary document from *filing* and save it to *output_dir*.
@@ -142,7 +144,7 @@ def download_filing(
     if suffix not in (".pdf", ".htm", ".html"):
         suffix = ".htm"
 
-    dest_dir = Path(output_dir)
+    dest_dir = Path(output_dir) if output_dir is not None else settings.raw_pdfs_dir
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     filename = f"{ticker}_{year}_{doc_type}{suffix}"

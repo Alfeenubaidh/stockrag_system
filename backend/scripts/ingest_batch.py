@@ -1,12 +1,13 @@
 """
-scripts/ingest_batch.py — Batch-ingest a folder of PDF filings.
+scripts/ingest_batch.py — Batch-ingest a folder of PDF/HTML filings.
 
 Filename convention (required):
-    TICKER_YEAR_DOCTYPE.pdf
-    e.g. AAPL_2024_10K.pdf → ticker=AAPL, filing_date=YEAR-01-01, doc_type=10-K
+    TICKER_YEAR_DOCTYPE.{pdf,html,htm}
+    e.g. AAPL_2024_10K.pdf  → ticker=AAPL, filing_date=YEAR-01-01, doc_type=10-K
+         AAPL_2024_10K.html → same metadata, parsed via HTMLParser
 
 Usage:
-    python scripts/ingest_batch.py --dir data/raw/pdfs [--dry-run] [--collection sec_filings]
+    python scripts/ingest_batch.py --dir data/raw/filings [--dry-run] [--collection sec_filings]
 """
 
 from __future__ import annotations
@@ -61,15 +62,18 @@ def _parse_filename(stem: str) -> tuple[str, str, str] | None:
     return ticker, f"{year}-01-01", doc_type
 
 
+_HTML_EXTENSIONS = {".html", ".htm"}
+
+
 def _ingest_one(
-    pdf_path: Path,
+    file_path: Path,
     ticker: str,
     filing_date: str,
     doc_type: str,
     collection: str,
     dry_run: bool,
 ) -> int:
-    """Run the full ingest pipeline for one PDF. Returns chunk count."""
+    """Run the full ingest pipeline for one file. Returns chunk count."""
     from ingestion.doc_metadata import DocumentMetadata
     from ingestion.ingest import Ingest
 
@@ -82,8 +86,14 @@ def _ingest_one(
         accession_number="unknown",
     )
 
-    pipeline = Ingest(doc_id=doc_id, metadata=metadata)
-    chunks = pipeline.run(str(pdf_path))
+    if file_path.suffix.lower() in _HTML_EXTENSIONS:
+        from ingestion.html_parser import HTMLParser
+        parser = HTMLParser()
+    else:
+        parser = None  # Ingest defaults to PDFParser
+
+    pipeline = Ingest(doc_id=doc_id, metadata=metadata, parser=parser)
+    chunks = pipeline.run(str(file_path))
 
     if not chunks:
         raise ValueError("No chunks produced — check PDF content")
@@ -127,7 +137,7 @@ def main() -> None:
         prog="ingest_batch",
         description="Batch-ingest a folder of PDF filings.",
     )
-    parser.add_argument("--dir",        required=True, help="Folder to scan recursively for .pdf files")
+    parser.add_argument("--dir",        required=True, help="Folder to scan recursively for .pdf / .html / .htm files")
     parser.add_argument("--collection", default="sec_filings", help="Qdrant collection name")
     parser.add_argument("--dry-run",    action="store_true", help="Parse and chunk only — no embedding or upsert")
     args = parser.parse_args()
@@ -140,31 +150,37 @@ def main() -> None:
         logger.error("Not a directory: %s", root)
         sys.exit(1)
 
-    pdfs = sorted(root.rglob("*.pdf"))
-    if not pdfs:
-        logger.warning("No .pdf files found under %s", root)
+    files = sorted(
+        f for ext in ("*.pdf", "*.html", "*.htm")
+        for f in root.rglob(ext)
+    )
+    if not files:
+        logger.warning("No .pdf / .html / .htm files found under %s", root)
         sys.exit(0)
 
-    logger.info("Found %d PDF file(s) under %s", len(pdfs), root)
+    logger.info("Found %d file(s) under %s", len(files), root)
 
     ingested_files = 0
     total_chunks = 0
     skipped = 0
 
-    for pdf in pdfs:
-        parsed = _parse_filename(pdf.stem)
+    for filing in files:
+        parsed = _parse_filename(filing.stem)
         if parsed is None:
-            logger.warning("Skipping %s — filename does not match TICKER_YEAR_DOCTYPE.pdf", pdf.name)
+            logger.warning(
+                "Skipping %s — filename does not match TICKER_YEAR_DOCTYPE pattern",
+                filing.name,
+            )
             skipped += 1
             continue
 
         ticker, filing_date, doc_type = parsed
-        label = pdf.stem
+        label = filing.name
 
         print(f"Ingesting {label}...", end=" ", flush=True)
         try:
             n_chunks = _ingest_one(
-                pdf_path=pdf,
+                file_path=filing,
                 ticker=ticker,
                 filing_date=filing_date,
                 doc_type=doc_type,
@@ -176,7 +192,7 @@ def main() -> None:
             total_chunks += n_chunks
         except Exception as exc:
             print("FAILED")
-            logger.error("Failed to ingest %s: %s", pdf.name, exc)
+            logger.error("Failed to ingest %s: %s", filing.name, exc)
             skipped += 1
 
     suffix = " [dry run]" if args.dry_run else ""

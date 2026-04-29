@@ -17,6 +17,8 @@ from typing import Optional
 import requests
 from bs4 import BeautifulSoup
 
+from config.settings import settings
+
 logger = logging.getLogger(__name__)
 
 _USER_AGENT = (
@@ -81,7 +83,7 @@ def download_transcript(
     ticker: str,
     year: int,
     quarter: int,
-    output_dir: str = "data/raw/pdfs",
+    output_dir: Path | str | None = None,
 ) -> Optional[Path]:
     """
     Fetch the transcript HTML page, extract the main article text, and save
@@ -93,7 +95,7 @@ def download_transcript(
     if url is None:
         return None
 
-    dest_dir = Path(output_dir)
+    dest_dir = Path(output_dir) if output_dir is not None else settings.raw_pdfs_dir
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     filename = f"{ticker.upper()}_{year}_Q{quarter}_transcript.txt"

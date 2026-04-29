@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]  # backend/config/settings.py → project root
 
 
 class Settings(BaseSettings):
@@ -35,6 +39,9 @@ class Settings(BaseSettings):
     use_remote_embeddings: bool = Field(default=False, env="USE_REMOTE_EMBEDDINGS")
     hf_api_key: str = Field(default="", env="HF_API_KEY")
     hf_api_token: str = Field(default="", env="HF_API_KEY")
+
+    # Paths
+    raw_pdfs_dir: Path = _PROJECT_ROOT / "data" / "raw" / "pdfs"
 
     # API
     api_host: str = "0.0.0.0"
