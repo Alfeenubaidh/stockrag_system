@@ -1,7 +1,8 @@
 """
-embedder.py — Local embedding pipeline (GPU-enabled, production-safe)
+embedder.py — Embedding pipeline with local (SentenceTransformer) and remote (HF Inference API) modes.
 
 Model: all-MiniLM-L6-v2 (384 dims)
+Set USE_REMOTE_EMBEDDINGS=true to skip torch entirely and use HF Inference API.
 """
 
 import logging
@@ -9,8 +10,6 @@ from typing import List, Dict
 from dataclasses import dataclass
 
 import numpy as np
-import torch
-from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
 
@@ -35,29 +34,43 @@ class EmbeddingPipeline:
     def __init__(self, config: EmbeddingConfig = EmbeddingConfig()):
         self.config = config
 
-        # ✅ Device detection
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        from backend.config.settings import settings
 
-        # ✅ Load + move model to GPU
-        self.model = SentenceTransformer(self.config.model_name)
-        self.model.to(self.device)
+        self._remote = settings.use_remote_embeddings
 
-        logger.info(f"Embedding model running on: {self.device}")
-        logger.info(f"Model device: {next(self.model.parameters()).device}")
-
-        # ✅ Validate embedding dimension
-        test_vec = self.model.encode(
-            ["test"],
-            convert_to_numpy=True,
-            device=self.device
-        )[0]
-
-        self.dim = len(test_vec)
-
-        if self.dim != 384:
-            raise RuntimeError(
-                f"Embedding dimension mismatch: expected 384, got {self.dim}"
+        if self._remote:
+            self._hf_api_key = settings.hf_api_key
+            if not self._hf_api_key:
+                raise ValueError("HF_API_KEY must be set when USE_REMOTE_EMBEDDINGS=true")
+            self._hf_url = (
+                f"https://api-inference.huggingface.co/models/"
+                f"sentence-transformers/{self.config.model_name}"
             )
+            self.dim = 384
+            logger.info(f"Embedding pipeline in remote mode via HF Inference API: {self._hf_url}")
+        else:
+            import torch
+            from sentence_transformers import SentenceTransformer
+
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.model = SentenceTransformer(self.config.model_name)
+            self.model.to(self.device)
+
+            logger.info(f"Embedding model running on: {self.device}")
+            logger.info(f"Model device: {next(self.model.parameters()).device}")
+
+            test_vec = self.model.encode(
+                ["test"],
+                convert_to_numpy=True,
+                device=self.device
+            )[0]
+
+            self.dim = len(test_vec)
+
+            if self.dim != 384:
+                raise RuntimeError(
+                    f"Embedding dimension mismatch: expected 384, got {self.dim}"
+                )
 
     # ------------------------------------------------------------------
     # Helpers
@@ -77,17 +90,41 @@ class EmbeddingPipeline:
     # Core embedding
     # ------------------------------------------------------------------
 
-    def _embed_batch(self, texts: List[str]) -> List[List[float]]:
-        texts = [self._truncate(t) for t in texts]
-        self._validate_texts(texts)
+    def _embed_batch_remote(self, texts: List[str]) -> List[List[float]]:
+        import httpx
 
+        response = httpx.post(
+            self._hf_url,
+            headers={"Authorization": f"Bearer {self._hf_api_key}"},
+            json={"inputs": texts},
+            timeout=30,
+        )
+
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"HF Inference API error {response.status_code}: {response.text}"
+            )
+
+        embeddings = response.json()
+
+        if not isinstance(embeddings, list):
+            raise TypeError(f"Unexpected HF API response type: {type(embeddings)}")
+
+        if len(embeddings) != len(texts):
+            raise ValueError(
+                f"HF API returned {len(embeddings)} embeddings for {len(texts)} inputs"
+            )
+
+        return embeddings
+
+    def _embed_batch_local(self, texts: List[str]) -> List[List[float]]:
         embeddings = self.model.encode(
             texts,
             batch_size=self.config.batch_size,
             convert_to_numpy=True,
             normalize_embeddings=self.config.normalize,
             show_progress_bar=False,
-            device=self.device,  # 🔥 CRITICAL: forces GPU
+            device=self.device,
         )
 
         if not isinstance(embeddings, np.ndarray):
@@ -99,6 +136,14 @@ class EmbeddingPipeline:
             )
 
         return embeddings.tolist()
+
+    def _embed_batch(self, texts: List[str]) -> List[List[float]]:
+        texts = [self._truncate(t) for t in texts]
+        self._validate_texts(texts)
+
+        if self._remote:
+            return self._embed_batch_remote(texts)
+        return self._embed_batch_local(texts)
 
     # ------------------------------------------------------------------
     # Public: embed raw texts

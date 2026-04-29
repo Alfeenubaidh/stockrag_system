@@ -1,0 +1,45 @@
+# Production requirements — USE_REMOTE_EMBEDDINGS=true
+# torch, sentence-transformers, transformers, scipy, scikit-learn,
+# safetensors, tokenizers, huggingface-hub, triton, nvidia-* omitted.
+
+# Core
+numpy
+pandas
+tqdm
+
+# Vector DB
+qdrant-client
+
+# Parsing
+beautifulsoup4
+lxml
+pdfplumber
+pymupdf
+
+# HTTP (remote embeddings)
+httpx
+
+# Utils
+python-dotenv
+requests
+feedparser
+
+# API
+fastapi
+uvicorn[standard]
+pydantic-settings
+python-multipart
+
+# Caching / rate limiting
+redis
+slowapi
+
+# Scheduler
+APScheduler
+
+# Observability
+prometheus-fastapi-instrumentator
+prometheus-client
+
+# Logging / misc
+typing-extensions

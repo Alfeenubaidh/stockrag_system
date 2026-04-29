@@ -4,9 +4,12 @@ pandas
 tqdm
 
 # Embeddings / NLP
+# Not needed when USE_REMOTE_EMBEDDINGS=true
 sentence-transformers
 torch
 transformers
+scipy
+scikit-learn
 
 # Vector DB
 qdrant-client

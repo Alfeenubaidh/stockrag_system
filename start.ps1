@@ -1,4 +1,4 @@
-# Start Qdrant if not already running
+# Start Qdrant
 $qdrant = docker ps --filter "name=qdrant" --format "{{.Names}}"
 if (-not $qdrant) {
     Write-Host "Starting Qdrant..."
@@ -9,10 +9,10 @@ if (-not $qdrant) {
 
 # Start FastAPI
 Write-Host "Starting FastAPI..."
-Start-Process -NoNewWindow python -ArgumentList "-m uvicorn api.main:app --host 0.0.0.0 --port 8001 --env-file .env" -WorkingDirectory "D:\astrorag\backend"
+Start-Process -NoNewWindow python -ArgumentList "-m uvicorn api.main:app --port 8001 --env-file .env" -WorkingDirectory "D:\stockrag_system\backend"
 
 # Start Frontend
 Write-Host "Starting Frontend..."
-Start-Process -NoNewWindow cmd -ArgumentList "/c npm run dev" -WorkingDirectory "D:\astrorag\frontend"
+Start-Process -NoNewWindow cmd -ArgumentList "/c npm run dev" -WorkingDirectory "D:\stockrag_system\frontend"
 
 Write-Host "All services started. Open http://localhost:3000"
