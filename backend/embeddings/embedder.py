@@ -43,7 +43,7 @@ class EmbeddingPipeline:
             if not self._hf_api_key:
                 raise ValueError("HF_API_KEY must be set when USE_REMOTE_EMBEDDINGS=true")
             self._hf_url = (
-                f"https://api-inference.huggingface.co/models/"
+                f"https://api-inference.huggingface.co/pipeline/feature-extraction/"
                 f"sentence-transformers/{self.config.model_name}"
             )
             self.dim = 384
