@@ -39,15 +39,15 @@ class EmbeddingPipeline:
         self._remote = settings.use_remote_embeddings
 
         if self._remote:
-            self._hf_api_key = settings.hf_api_key
-            if not self._hf_api_key:
-                raise ValueError("HF_API_KEY must be set when USE_REMOTE_EMBEDDINGS=true")
+            self._hf_api_token = settings.hf_api_token
+            if not self._hf_api_token:
+                raise ValueError("HF_API_TOKEN must be set when USE_REMOTE_EMBEDDINGS=true")
             self._hf_url = (
-                f"https://api-inference.huggingface.co/pipeline/feature-extraction/"
-                f"sentence-transformers/{self.config.model_name}"
+                f"https://router.huggingface.co/hf-inference/models/"
+                f"sentence-transformers/{self.config.model_name}/pipeline/feature-extraction"
             )
             self.dim = 384
-            logger.info(f"Embedding pipeline in remote mode via HF Inference API: {self._hf_url}")
+            logger.info(f"Embedding pipeline in remote mode via HF router: {self._hf_url}")
         else:
             import torch
             from sentence_transformers import SentenceTransformer
@@ -95,7 +95,7 @@ class EmbeddingPipeline:
 
         response = httpx.post(
             self._hf_url,
-            headers={"Authorization": f"Bearer {self._hf_api_key}"},
+            headers={"Authorization": f"Bearer {self._hf_api_token}"},
             json={"inputs": texts},
             timeout=30,
         )

@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     # Remote embeddings
     use_remote_embeddings: bool = Field(default=False, env="USE_REMOTE_EMBEDDINGS")
     hf_api_key: str = Field(default="", env="HF_API_KEY")
+    hf_api_token: str = Field(default="", env="HF_API_KEY")
 
     # API
     api_host: str = "0.0.0.0"
