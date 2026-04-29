@@ -22,6 +22,9 @@ httpx
 # BM25 sparse retrieval
 rank-bm25
 
+# LLM inference
+groq
+
 # Utils
 python-dotenv
 requests
