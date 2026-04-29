@@ -6,8 +6,6 @@ import re
 from pathlib import Path
 from typing import Any
 
-import os
-
 from groq import Groq
 
 from market_data import get_snapshot
@@ -37,7 +35,19 @@ _MAX_TOKENS = 512
 _TEMPERATURE = 0  # deterministic
 _MAX_CHUNK_CHARS = 1000  # ~250 tokens; keeps all chunks within 4096 ctx window
 
-_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+_client: "Groq | None" = None
+
+
+def _get_client() -> "Groq":
+    global _client
+    if _client is None:
+        from config.settings import settings
+        if not settings.groq_api_key:
+            raise RuntimeError(
+                "GROQ_API_KEY is not set. Configure it in .env before making generation requests."
+            )
+        _client = Groq(api_key=settings.groq_api_key)
+    return _client
 
 # Extraction pre-pass: bridges paraphrase gap for regulatory/availability queries.
 # Triggers when query contains any of these terms, runs on chunks scoring above threshold.
@@ -152,7 +162,7 @@ def _call_llm(
     user_message: str,
 ) -> str:
     """Call Groq API. Returns the raw response text."""
-    response = _client.chat.completions.create(
+    response = _get_client().chat.completions.create(
         model=_MODEL,
         messages=[
             {"role": "system", "content": system_prompt},

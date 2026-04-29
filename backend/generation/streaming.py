@@ -10,7 +10,7 @@ from .generator import (
     _MAX_TOKENS,
     _MODEL,
     _TEMPERATURE,
-    _client,
+    _get_client,
 )
 
 logger = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ def stream_answer(
     user_message = answer_template.format(query=query, context=context)
 
     try:
-        stream = _client.chat.completions.create(
+        stream = _get_client().chat.completions.create(
             model=_MODEL,
             messages=[
                 {"role": "system", "content": system_prompt},
