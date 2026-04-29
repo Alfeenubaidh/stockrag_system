@@ -17,7 +17,7 @@ function KnowledgeBaseModal({ onClose }: { onClose: () => void }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/documents');
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/documents`);
       if (res.status === 503) throw new Error('Vector store offline — start Qdrant and retry');
       if (!res.ok) throw new Error(`Server error (HTTP ${res.status})`);
       setDocs(await res.json());
@@ -151,7 +151,7 @@ export const TopBar: React.FC = () => {
 
           <button
             className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700 h-full px-1 transition-colors"
-            onClick={() => window.open('http://localhost:8001/docs', '_blank')}
+            onClick={() => window.open(`${import.meta.env.VITE_API_URL}/docs`, '_blank')}
           >
             <Code className="w-4 h-4" />
             API

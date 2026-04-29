@@ -66,7 +66,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
 
     try {
-      const res = await fetch('/api/query/stream', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/query/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: content, ticker: null, top_k: 5 }),
