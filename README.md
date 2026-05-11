@@ -119,7 +119,7 @@ Create `backend/.env`:
 QDRANT_URL=https://your-cluster.qdrant.io
 QDRANT_API_KEY=your-qdrant-api-key
 GROQ_API_KEY=your-groq-api-key
-HF_API_KEY=your-huggingface-token
+HF_API_TOKEN=your-huggingface-token
 USE_REMOTE_EMBEDDINGS=true
 ```
 
@@ -164,6 +164,8 @@ Batch ingest a folder of SEC filing PDFs or HTML files:
 cd backend
 PYTHONPATH=. python scripts/ingest_batch.py --dir ../data/raw
 ```
+
+> **Windows (PowerShell):** `$env:PYTHONPATH="."; python scripts/ingest_batch.py --dir ../data/raw`
 
 Files should be named `TICKER_YEAR_DOCTYPE.pdf` (e.g. `AAPL_2024_10-K.pdf`). The pipeline parses, sections, chunks, embeds, and upserts to Qdrant. Duplicate documents are detected and skipped.
 
