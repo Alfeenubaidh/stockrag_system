@@ -201,6 +201,18 @@ Multipart upload of a single filing with metadata fields (`ticker`, `doc_type`, 
 
 ---
 
+## Known Limitations
+
+- Reranker runs on CPU; latency increases on long contexts
+- HF Inference API for embeddings has rate limits on free tier; heavy load may cause 429s
+- Render free tier cold starts (~30s) despite uptime monitor if monitor interval exceeds Render's sleep threshold
+- iXBRL parser handles `ix:header` decomposition but does not resolve cross-file XBRL references
+- BM25 index is in-memory and rebuilt on each backend restart; not persisted
+- Evaluation set is 36 queries; scores may not generalize across all financial query types
+- Live market data via yfinance is best-effort; API failures are silently ignored
+
+---
+
 ## Disclaimer
 
 This system is for informational and research purposes only. Nothing produced by this application constitutes financial advice. Always consult a qualified financial advisor before making investment decisions.
