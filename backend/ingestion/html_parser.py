@@ -91,12 +91,27 @@ class ParsedPage:
 # CLEAN HTML
 # ------------------------------------------------------------------
 
+_IXBRL_METADATA_TAGS = {"ix:header", "ix:hidden", "ix:references", "ix:resources"}
+
+_BLOCK_ELEMENTS = ["p", "div", "li", "table", "ul", "ol", "h1", "h2", "h3", "h4", "h5", "h6"]
+
+
 def clean_html(html: str):
     soup = _get_soup(html)
 
     for tag in soup.find_all(["script", "style", "meta", "link", "noscript", "head"]):
         tag.decompose()
 
+    # iXBRL metadata containers must be removed entirely — their text content is
+    # XBRL context data (CIK numbers, member names, period refs), not document prose.
+    # Unwrapping them (the generic path below) would dump ~50k chars of metadata noise
+    # into the extracted text, collapsing section detection and inflating chunk count.
+    for tag_name in _IXBRL_METADATA_TAGS:
+        for tag in soup.find_all(tag_name):
+            tag.decompose()
+
+    # Unwrap remaining iXBRL inline elements (ix:nonFraction, ix:nonNumeric,
+    # ix:continuation, etc.) so their text content flows into the surrounding prose.
     for tag in soup.find_all(True):
         name = tag.name or ""
         prefix = tag.prefix or (name.split(":")[0] if ":" in name else None)
@@ -107,21 +122,22 @@ def clean_html(html: str):
 
 
 # ------------------------------------------------------------------
-# EXTRACT TEXT (FIXED: preserve structure)
+# EXTRACT TEXT
 # ------------------------------------------------------------------
 
 def _extract_text(soup: BeautifulSoup) -> str:
     parts = []
+    body = soup.find("body") or soup
 
-    for el in soup.find_all(["p", "div", "span", "li", "td", "th"]):
-        text = el.get_text(" ", strip=True)
-        if text:
-            parts.append(text)
+    # Collect only leaf-level block elements to avoid duplicating text that
+    # also appears in their ancestor divs/tds.
+    for el in body.find_all(["p", "div", "li", "td", "th"]):
+        if not el.find(_BLOCK_ELEMENTS):
+            text = el.get_text(" ", strip=True)
+            if text:
+                parts.append(text)
 
-    # 🔥 CRITICAL: preserve line boundaries
     raw = "\n".join(parts)
-
-    # normalize spacing WITHOUT destroying structure
     raw = re.sub(r"[ \t]+", " ", raw)
     raw = re.sub(r"\n{2,}", "\n", raw)
 
@@ -135,12 +151,11 @@ def _extract_text(soup: BeautifulSoup) -> str:
 def extract_sections(text: str) -> List[dict]:
     matches = list(ITEM_PATTERN.finditer(text))
 
-    sections = []
-
     if not matches:
         logger.warning("No SEC items detected — fallback to single section")
         return [{"title": "unknown", "text": text}]
 
+    sections = []
     for i, match in enumerate(matches):
         code = match.group(1).upper()
         title = SEC_SECTIONS.get(code, f"Item {code}")
@@ -151,10 +166,21 @@ def extract_sections(text: str) -> List[dict]:
         section_text = text[start:end].strip()
 
         if len(section_text) > 100:
-            sections.append({
-                "title": title,
-                "text": section_text
-            })
+            sections.append({"title": title, "text": section_text})
+
+    # iXBRL documents (e.g. INTC) often embed "Item X." labels only in the
+    # table-of-contents, not in the body section headings. When the total text
+    # captured by detected sections covers less than 15% of the full document,
+    # the match set is almost certainly TOC-only. Fall back to single-section
+    # chunking so the entire body content is preserved.
+    covered = sum(len(s["text"]) for s in sections)
+    if covered < 0.15 * len(text):
+        logger.warning(
+            "Section detection captured only %.1f%% of document text — "
+            "likely TOC-only match. Falling back to single section.",
+            100 * covered / max(len(text), 1),
+        )
+        return [{"title": "unknown", "text": text}]
 
     logger.info(f"Extracted {len(sections)} sections")
     return sections
