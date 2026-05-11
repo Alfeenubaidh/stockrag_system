@@ -238,7 +238,7 @@ def parse_html_filing(
                     page_num=page_num,
                     doc_id=doc_id,
                     doc_type=doc_type,
-                    section=sec["title"],  # 🔥 now always valid
+                    section=sec["title"],  
                 )
             )
             page_num += 1

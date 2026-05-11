@@ -1,5 +1,5 @@
 """
-reranker.py — Cross-encoder reranking with section bonus and ranking signals.
+reranker.py — flashrank reranking with section bonus and ranking signals.
 
 Final scoring formula per chunk:
     final = ce_score
@@ -8,8 +8,8 @@ Final scoring formula per chunk:
           - boilerplate_penalty  (fraction of text that is generic SEC filler)
 
 Weights are additive so each component acts as a tiebreaker at its scale:
-  - CE score range on 10-K text: roughly [-8, +5]
-  - section_bonus: 3.5 (overrides same-section CE variance)
+  - CE score range (flashrank ms-marco-MiniLM-L-12-v2): roughly [0, 1]
+  - section_bonus: 6.0 (overrides same-section CE variance)
   - keyword_bonus: up to ~3.5 (overrides generic vs. specific chunk gap)
   - boilerplate_penalty: up to 1.5 (demotes filler-heavy chunks)
 """
@@ -19,22 +19,12 @@ from __future__ import annotations
 import logging
 from typing import List, Optional
 
-try:
-    from sentence_transformers import CrossEncoder
-    _RERANKER_AVAILABLE = True
-except ImportError:
-    _RERANKER_AVAILABLE = False
+from flashrank import Ranker, RerankRequest
 
 from retrieval.ranking_signals import RankingSignalScorer
 from observability.pipeline_observer import observer
 
 logger = logging.getLogger(__name__)
-
-if not _RERANKER_AVAILABLE:
-    logger.warning(
-        "sentence-transformers not installed — CrossEncoderReranker disabled. "
-        "Install torch + sentence-transformers to enable reranking."
-    )
 
 _SECTION_BONUS = 6.0
 _signal_scorer = RankingSignalScorer()
@@ -61,14 +51,11 @@ def _section_matches(hint: str, section: str) -> bool:
 class CrossEncoderReranker:
     def __init__(
         self,
-        model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2",
+        model_name: str = "ms-marco-MiniLM-L-12-v2",
         batch_size: int = 32,
     ):
         self.batch_size = batch_size
-        if _RERANKER_AVAILABLE:
-            self.model = CrossEncoder(model_name)
-        else:
-            self.model = None
+        self.model = Ranker(model_name=model_name)
 
     def rerank(
         self,
@@ -78,7 +65,7 @@ class CrossEncoderReranker:
         section_hint: Optional[str] = None,
     ) -> List:
         """
-        Rerank results using cross-encoder + section bonus + keyword signals.
+        Rerank results using flashrank + section bonus + keyword signals.
 
         Args:
             query:        Original user query (full, untruncated).
@@ -89,26 +76,24 @@ class CrossEncoderReranker:
         if not results:
             return results
 
-        if self.model is None:
-            logger.debug("rerank: no model available, returning top_k by existing score")
-            return results[:top_k]
+        passages = [{"id": i, "text": r.text} for i, r in enumerate(results)]
+        request = RerankRequest(query=query, passages=passages)
+        ranked = self.model.rerank(request)
 
-        # Cross-encoder scores full chunk text — no truncation
-        pairs  = [(query, r.text) for r in results]
-        scores = self.model.predict(pairs, batch_size=self.batch_size)
+        # ranked is ordered best-first; map scores back by passage id
+        score_by_idx = {item["id"]: item["score"] for item in ranked}
 
         rerank_hits: list[dict] = []
-        for r, ce_score in zip(results, scores):
-            # 1. Section relevance bonus
-            section_bonus = _SECTION_BONUS if _section_matches(section_hint, r.section) else 0.0
+        for i, r in enumerate(results):
+            ce_score = score_by_idx.get(i, 0.0)
 
-            # 2. Keyword overlap + co-occurrence bonus; boilerplate penalty
+            section_bonus = _SECTION_BONUS if _section_matches(section_hint, r.section) else 0.0
             keyword_bonus, boilerplate_penalty = _signal_scorer.score(query, r.text)
 
             r.score = float(ce_score) + section_bonus + keyword_bonus - boilerplate_penalty
 
             logger.debug(
-                "chunk=%s ce=%.2f sec=%.1f kw=%.2f bp=%.2f final=%.2f",
+                "chunk=%s ce=%.4f sec=%.1f kw=%.2f bp=%.2f final=%.4f",
                 r.chunk_id, ce_score, section_bonus, keyword_bonus,
                 boilerplate_penalty, r.score,
             )

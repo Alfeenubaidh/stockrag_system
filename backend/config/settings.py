@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     # Scheduler
     watchlist_tickers: list[str] = Field(default_factory=list)
 
+    # Reranker
+    enable_reranker: bool = Field(default=False, env="ENABLE_RERANKER")
+
     # Remote embeddings
     use_remote_embeddings: bool = Field(default=False, env="USE_REMOTE_EMBEDDINGS")
     hf_api_key: str = Field(default="", env="HF_API_KEY")

@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import logging
 from functools import lru_cache
+from typing import Optional
 
 from qdrant_client import QdrantClient
 
 from config.settings import settings
 from embeddings.embedder import EmbeddingConfig, EmbeddingPipeline
 from retrieval.retrieval import RetrievalConfig, RetrievalPipeline
+from retrieval.reranker import CrossEncoderReranker
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +44,14 @@ def get_retrieval_pipeline() -> RetrievalPipeline:
         fetch_k=settings.retrieval_fetch_k,
         score_threshold=settings.retrieval_score_threshold,
     )
+    reranker: Optional[CrossEncoderReranker] = None
+    if settings.enable_reranker:
+        logger.info("Reranker enabled (ms-marco-MiniLM-L-12-v2)")
+        reranker = CrossEncoderReranker()
     return RetrievalPipeline(
         qdrant=get_qdrant(),
         embedder=get_embedder(),
         collection=settings.qdrant_collection,
         config=cfg,
+        reranker=reranker,
     )
