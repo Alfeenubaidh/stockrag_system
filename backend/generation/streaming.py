@@ -33,7 +33,7 @@ def _build_context(chunks: list[dict[str, Any]]) -> str:
         text = c.get("text", "").strip()
         if not text:
             continue
-        header = f"[{ticker} {doc_type} · {section}]" if section else f"[{ticker} {doc_type}]"
+        header = f"[{ticker} {doc_type} \u00b7 {section}]" if section else f"[{ticker} {doc_type}]"
         parts.append(f"{header}\n{text}")
     return "\n\n".join(parts)
 

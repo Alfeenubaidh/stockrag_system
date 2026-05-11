@@ -144,7 +144,7 @@ def format_citations(text: str, ticker_metadata: dict | None = None) -> str:
         raw = match.group(0)
 
         # Already in new format — leave untouched
-        if "·" in raw:
+        if "\u00b7" in raw:
             return raw
 
         inner = raw[1:-1]
