@@ -55,6 +55,30 @@ backend/
 
 ---
 
+## Example Questions
+
+**Fundamentals**
+- "What are Apple's main risk factors?"
+- "How does Microsoft generate revenue?"
+
+**Year-specific**
+- "What did NVIDIA say about data center growth in 2024?"
+- "How did Intel's gross margin change from 2022 to 2024?"
+
+**Comparative**
+- "Compare AMD and Intel's R&D spending"
+- "Which company had the highest revenue growth in 2023 — Apple or Microsoft?"
+
+**Forward-looking**
+- "What risks did Tesla mention about autonomous driving?"
+- "What is Amazon's outlook on AWS competition?"
+
+**Financial detail**
+- "What was Meta's operating income in FY2024?"
+- "How does Google describe its advertising revenue risks?"
+
+---
+
 ## Evaluation Results
 
 | Metric | Score |
