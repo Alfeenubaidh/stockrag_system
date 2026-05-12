@@ -22,9 +22,6 @@ httpx
 # BM25 sparse retrieval
 rank-bm25
 
-# Reranking
-flashrank
-
 # LLM inference
 groq
 
