@@ -49,3 +49,5 @@ prometheus-client
 
 # Logging / misc
 typing-extensions
+
+flashrank
